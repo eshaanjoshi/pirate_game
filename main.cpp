@@ -1,49 +1,27 @@
-#include <cmath>
-#include <cstdlib>
-#include "tgaimage.h"
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include "src/player.hpp"
+#include "src/event_handler.hpp"
 
-const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor red   = TGAColor(255, 0,   0,   255);
-
-void line(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
-    bool steep = false;
-    if (std::abs(x0 - y0)<std::abs(y0-y1))
+int main()
+{
+    sf::RenderWindow window(sf::VideoMode(512, 512), "SFML Tutorial", sf::Style::Default);
+    sf::RectangleShape player(sf::Vector2f(100.0f, 100.0f));
+    player.setFillColor(sf::Color::Red);
+    player.setOrigin(50.0f, 50.0f);
+    while(window.isOpen())
     {
-        std::swap(x0, y0);
-        std::swap(x1, y1);
-        steep = true;
-    }
-    if (x0>x1)
-    {
-        std::swap(x0, x1);
-        std::swap(y0, y1);
-    }
-    int dx = x1-x0;
-    int dy = y1-y0;
-    int derror2 = std::abs(dy)*2;
-    int error2 = 0;
-    int y = y0;
-    for (int x = x0; x<x1; x++)
-    {
-        if(steep) {
-            image.set(y, x, color);
+        sf::Event evnt;
+        while(window.pollEvent(evnt))
+        {
+            event_handler(&window, &evnt);
         }
-        else {
-            image.set(x, y, color);
-        }
-        error2 += derror2;
-        if (error2 > dx){
-            y+= (y1>y0?1:-1);
-            error2 -= dx*2;
 
-        }
+        player_move_mouse(&window, &player);
+        window.clear(); 
+        window.draw(player);
+        window.display();
     }
-}
 
-int main(int argc, char** argv) {
-    TGAImage image(100, 100, TGAImage::RGB);
-    line(13, 20, 80, 40, image, white);
-    image.flip_vertically(); // i want to have the origin at the left bottom corner of the image
-    image.write_tga_file("output.tga");
-    return 0;
+
 }
