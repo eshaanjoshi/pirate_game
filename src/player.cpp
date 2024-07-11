@@ -1,9 +1,24 @@
-#include <SFML/Graphics.hpp>
 
 
+#include "player.hpp"
 
-int player_controller(sf::RectangleShape *p)
+Player::Player(sf::RenderWindow *wi, sf::RectangleShape *pl) : Sprite(wi, pl)
 {
+    p = pl;
+    w = wi;
+    evnt = *evnt;
+    fx = 0.0f;
+    fy = 0.0f;
+    vx = 0.0f;
+    vy = 0.0f;
+}
+
+
+
+
+int Player::player_controller(sf::Event *evnt)
+{
+    
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
         {
             (*p).move(-0.1f, 0.0f);
@@ -20,11 +35,20 @@ int player_controller(sf::RectangleShape *p)
         {
             (*p).move(0.0f, 0.1f);
         }
+        if ((*evnt).type == sf::Event::KeyPressed)
+        {
+            printf(":(\n");
+            if ((*evnt).key.code == sf::Keyboard::R)
+            {
+                set_velocity(0.0f, 0.0f);
+                has_gravity_enabled = !has_gravity_enabled;
+            }
+        }
     return 0;
 }
 
 
-int player_move_mouse(sf::RenderWindow *w, sf::RectangleShape *p)
+int Player::player_move_mouse()
 {
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
@@ -32,4 +56,12 @@ int player_move_mouse(sf::RenderWindow *w, sf::RectangleShape *p)
         (*p).setPosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
     }
     return 0;
+}
+
+void Player::FixedUpdate() {
+    
+    //printf("%f %f %f %f\n", fx, fy, vx, vy);
+    gravity();
+    player_controller(&evnt);
+    player_move_mouse();
 }

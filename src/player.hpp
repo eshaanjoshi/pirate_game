@@ -1,6 +1,20 @@
+
+#ifndef PLAYER
+#define PLAYER
+
+
+#include <time.h>
+#include "Sprite.hpp"
 #include <SFML/Graphics.hpp>
-#include "player.cpp"
 
+class Player:public Sprite{
 
-int player_controller(sf::RectangleShape *p);
-int player_move_mouse(sf::RenderWindow *w, sf::RectangleShape *p);
+public:
+    Player(sf::RenderWindow *wi, sf::RectangleShape *p);
+    void FixedUpdate() override;    
+private:
+    int player_move_mouse();
+    int player_controller(sf::Event *evnt);
+
+};
+#endif

@@ -1,5 +1,7 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
+
+
+#include "event_handler.hpp"
+
 int event_handler(sf::RenderWindow *window, sf::Event *e){
     sf::Event evnt = *e;
     switch(evnt.type){
@@ -18,3 +20,4 @@ int event_handler(sf::RenderWindow *window, sf::Event *e){
                 }
     return 0;
 }
+
