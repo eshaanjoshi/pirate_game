@@ -1,6 +1,6 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-int event_handler(sf::RenderWindow *window, sf::Event *e){
+#include "../include/event_handler.hpp"
+
+int handle(sf::RenderWindow *window, sf::Event *e){
     sf::Event evnt = *e;
     switch(evnt.type){
                     case sf::Event::Closed:
@@ -11,7 +11,7 @@ int event_handler(sf::RenderWindow *window, sf::Event *e){
                         break;
                     case sf::Event::TextEntered:
                         if(evnt.text.unicode < 128){
-                            printf("%c", evnt.text.unicode);
+                            //printf("%c", evnt.text.unicode);
                         }
                         break;
                 

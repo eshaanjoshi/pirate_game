@@ -1,5 +1,6 @@
 *.gch
 *.o
 
+build
 .vscode
 !.vscode/settings.json

@@ -1,35 +1,55 @@
-#include <SFML/Graphics.hpp>
+#include "../include/player.hpp"
+#define STEP 1.0f
 
-
-
-int player_controller(sf::RectangleShape *p)
+Player::Player(sf::Shape *s):Sprite(s)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-        {
-            (*p).move(-0.1f, 0.0f);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-        {
-            (*p).move(0.1f, 0.0f);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-        {
-            (*p).move(0.0f, -0.1f);
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-        {
-            (*p).move(0.0f, 0.1f);
-        }
-    return 0;
+
 }
 
-
-int player_move_mouse(sf::RenderWindow *w, sf::RectangleShape *p)
+void Player::set_event(sf::Event *evnt)
 {
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    e = evnt;
+}
+
+int Player::player_controller()
+{
+    
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
     {
-        sf::Vector2i mousePos = sf::Mouse::getPosition(*w);
-        (*p).setPosition(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
+        (*texture).move(-STEP, 0.0f);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+    {
+        (*texture).move(STEP, 0.0f);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    {
+        (*texture).move(0.0f, -STEP);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    {
+        (*texture).move(0.0f, STEP);
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
+    {
+        prev = force;
+        force = sf::Vector2f(0.0f, 0.0f);
+        gravity_enabled = false;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::H))
+    {
+        force = prev;
+        gravity_enabled = true;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
+    {
+        velocity = sf::Vector2f(0.0f, -0.5f);
     }
     return 0;
 }
+
+void Player::FixedUpdate(){
+    player_controller();
+    gravity();
+}
+
