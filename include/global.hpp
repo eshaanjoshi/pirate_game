@@ -1,6 +1,6 @@
 #ifndef GLOBAL
 #define GLOBAL
-#define FRAME_RATE 60
+
 #include <list>
 #include <SFML/Graphics.hpp>
 using namespace std;
@@ -13,6 +13,7 @@ public:
     void Run();
     void Draw(sf::RenderWindow *w);
     void Instantiate(Sprite *g);
+    void Collider();
 protected:
     list<Sprite*> InstantiatedObjects;
     void run_in_thread();
