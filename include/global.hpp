@@ -3,8 +3,10 @@
 
 #include <list>
 #include <SFML/Graphics.hpp>
+#include <thread>
 using namespace std;
 class Sprite;
+
 class Global{
 public:
     Global(int i);
@@ -14,9 +16,13 @@ public:
     void Draw(sf::RenderWindow *w);
     void Instantiate(Sprite *g);
     void Collider();
+    unsigned long checker;
 protected:
     list<Sprite*> InstantiatedObjects;
-    void run_in_thread();
+    list<Sprite*> BucketedObjects[8][8];
+    void do_collision(list<Sprite*> bucket, int idx);
+    std::thread T[8][8];
+    int run_in_thread();
     
 };
 #endif

@@ -27,6 +27,7 @@ public:
     SPRITE_TYPE sprite_type;
     bool contact;
     bool touch_ground;
+    sf::Vector2f pos;
 protected:
     sf::Shape *texture;
     bool gravity_enabled;
@@ -37,7 +38,7 @@ protected:
     float yoffset;
     void create_default_collider();
     void update_collider_pos();
-    sf::Vector2f pos;
+    
     sf::Vector3i offset;
 
 };

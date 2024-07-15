@@ -7,11 +7,12 @@
 #include "include/global.hpp"
 #include "include/timer.hpp"
 #include <cmath>
+#include <csignal>
 
 Global* CreateGlobal()
 {
     Global *g = new Global(1);
-    g->Run();
+    //g->Run();
     return g;
 }
 
@@ -78,31 +79,17 @@ int main()
 
     Global *g = CreateGlobal();
     //create_player(g, 10.0f, 10.0f);
-    for(int i = 0; i < 250; i++)
+    for(int i = 0; i < 1; i++)
     {
         multi_block_create(g);
     }
-    // create_block(g, 10.0f, 10.0f, 40.0f, 10.f, 10.0f, 0.0f, 1.0f);
-    // create_block(g, 10.0f, 10.0f, 502.0f, 138.f, -20.0f, 0.0f, 0.75f);
-    // create_block(g, 10.0f, 10.0f, 40.0f, 266.f, 30.0f, 0.0f, 0.25f);
-    // create_block(g, 10.0f, 10.0f, 502.0f, 394.f, -10.0f, 0.0f, 0.5f);
-    // create_block(g, 20.0f, 20.0f, 200.0f, 100.0f, 5.0f, 7.5f);
-    // create_block(g, 20.0f, 20.0f, 100.0f, 200.0f, 1.0f, 10.0f);
-    // create_block(g, 20.0f, 20.0f, 100.0f, 100.0f, 7.50f, 5.0f);
-    // create_block(g, 20.0f, 20.0f, 200.0f, 200.0f, 3.0f, 2.0f);
-    // create_platform(g, 512.0f, 10.0f, 256.0f, 512.0f);
-    // create_platform(g, 512.0f, 10.0f, 256.0f, 0.0f);
-    // create_platform(g, 10.0f, 512.0f, 0.0f, 256.0f);
-    // create_platform(g, 10.0f, 512.0f, 512.0f, 256.0f);
-    //create_platform(g, 512.0f, 10.0f, 256.0f, 128.0f);
-    // create_platform(g, 512.0f, 10.0f, 256.0f, 256.0f);
-    // create_platform(g, 512.0f, 10.0f, 256.0f, 384.0f);
+    uint64_t init_time = timer();
     create_platform(g, 512.0f, 10.0f, 256.0f, 512.0f);
     create_platform(g, 512.0f, 10.0f, 256.0f, 0.0f);
     create_platform(g, 10.0f, 512.0f, 0.0f, 256.0f);
     create_platform(g, 10.0f, 512.0f, 512.0f, 256.0f);
     int count = 0;
-    float init_time = timer_seconds();
+    g->Run();
     while(window.isOpen())
     {
         sf::Event evnt;
@@ -110,11 +97,8 @@ int main()
         {
             handle(&window, &evnt);
         }
-
-        window.clear(); 
-        
-        count = (count + 1) % 60;
+        window.clear();
         g->Draw(&window);
-        
+        window.display();
     }
 }
