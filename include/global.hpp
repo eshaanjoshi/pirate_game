@@ -9,20 +9,20 @@ class Sprite;
 
 class Global{
 public:
-    Global(int i);
-    void FixedUpdate();
-    int add_to_list(Sprite *g);
+    Global(int i);  
     void Run();
     void Draw(sf::RenderWindow *w);
     void Instantiate(Sprite *g);
-    void Collider();
-    unsigned long checker;
 protected:
+    unsigned long checker;
+    void Collider();
+    void init_buckets();
+    void FixedUpdate();  
+    int add_to_list(Sprite *g);   
     list<Sprite*> InstantiatedObjects;
     list<Sprite*> BucketedObjects[8][8];
     void do_collision(list<Sprite*> bucket, int idx);
     std::thread T[8][8];
     int run_in_thread();
-    
 };
 #endif

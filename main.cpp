@@ -6,17 +6,84 @@
 #include <X11/Xlib.h> 
 #include "include/global.hpp"
 #include "include/timer.hpp"
+#include "include/window_settings.hpp"
 #include <cmath>
 #include <csignal>
 
 Global* CreateGlobal()
 {
     Global *g = new Global(1);
-    //g->Run();
     return g;
 }
 
+int infected;
+int killed;
 
+void interact(Sprite *a, Sprite *b){
+    if(a->sprite_type==INFECTED_T && b->sprite_type==CLEAN_T)
+    {
+        if(rand() % 100 == 0)
+        {
+            b->sprite_type = INFECTED_T;
+            b->color = sf::Color::Red;
+            b->reset_frame_count();
+        }
+    }
+    if(a->sprite_type==CLEAN_T && b->sprite_type==INFECTED_T)
+    {
+        if(rand() % 100 == 0)
+        {
+            a->sprite_type = INFECTED_T;
+            a->color = sf::Color::Red;
+            a->reset_frame_count();
+        }
+    }
+    if(a->sprite_type==RECOVERED_T && b->sprite_type==CLEAN_T)
+    {
+        if(rand() % 500 == 0)
+        {
+            b->sprite_type = INFECTED_T;
+            b->color = sf::Color::Red;
+            b->reset_frame_count();
+        }
+    }
+    if(a->sprite_type==RECOVERED_T && b->sprite_type==INFECTED_T)
+    {
+        if(rand() % 500 == 0)
+        {
+            a->sprite_type = INFECTED_T;
+            a->color = sf::Color::Red;
+            a->reset_frame_count();
+        }
+    }
+
+}
+
+void update(Sprite *a)
+{
+    if(a->get_frame_count() > 180 && a->sprite_type == INFECTED_T)
+    {
+        if(rand() % 5 != 0){
+            a->sprite_type = RECOVERED_T;
+            a->reset_frame_count();
+            a->color = sf::Color::Magenta;
+        }
+        else{
+            a->sprite_type = DEAD_T;
+            a->color = sf::Color::Black;
+            a->set_velocity(0.0f, 0.0f);
+            a->mass = -1.0f;
+        }
+    }
+    if(a->get_frame_count() > 180 && a->sprite_type == RECOVERED_T)
+    {
+        if(rand() % 10 != 0){
+            a->sprite_type = CLEAN_T;
+            a->color = sf::Color::Green;
+            a->reset_frame_count();
+        }
+    }
+}
 
 Player *create_player(Global *g, float x, float y)
 {
@@ -26,7 +93,6 @@ Player *create_player(Global *g, float x, float y)
     player->setPosition(50.0f, 50.0f);
     Player *p = new Player(player, x/2, y/2, 20.0f);
     p->set_gravity(true);
-    //p->set_velocity(0.0f, 00.0f);
     p->set_force(0.0f, 10.0f);
     g->Instantiate(p);
     p->elasticity = 0.5f;
@@ -45,6 +111,14 @@ Sprite *create_block(Global *g, float x, float y, float xpos, float ypos, float 
     p->set_force(0.0f, 10.0f);
     g->Instantiate(p);
     p->elasticity = sqrt(e);
+    p->interact = &interact;
+    p->sprite_type = CLEAN_T;
+    p->color = sf::Color::Green;
+    if (rand() % 10 == 0){
+        p->sprite_type = INFECTED_T;
+        p->color = sf::Color::Red;
+    }
+    p->api_update = &update;
     return p;
 }
 
@@ -73,13 +147,11 @@ void multi_block_create(Global *g)
 int main()
 {
     XInitThreads();
-    sf::RenderWindow window(sf::VideoMode(512, 512), "SFML Tutorial", sf::Style::Close|sf::Style::Titlebar);
-
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "SFML Tutorial", sf::Style::Close|sf::Style::Titlebar);
     
 
     Global *g = CreateGlobal();
-    //create_player(g, 10.0f, 10.0f);
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < 5000; i++)
     {
         multi_block_create(g);
     }
@@ -92,13 +164,16 @@ int main()
     g->Run();
     while(window.isOpen())
     {
+        //multi_block_create(g);
         sf::Event evnt;
         while(window.pollEvent(evnt))
         {
             handle(&window, &evnt);
         }
-        window.clear();
+        
         g->Draw(&window);
-        window.display();
+        //if(count > 1000000 && count % 100 == 0) multi_block_create(g);
+        count++;
+        //window.display();
     }
 }

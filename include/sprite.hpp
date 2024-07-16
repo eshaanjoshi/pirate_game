@@ -9,7 +9,12 @@ enum SPRITE_TYPE{
     NONE_T,
     GROUND_T,
     PLAYER_T,
+    CLEAN_T,
+    INFECTED_T, 
+    DEAD_T,
+    RECOVERED_T
 };
+static const char * EnumStrings[] = { "none", "ground", "player", "clean", "infected", "dead", "recovered"};
 
 class Sprite:public GameObject{
 public:
@@ -28,6 +33,12 @@ public:
     bool contact;
     bool touch_ground;
     sf::Vector2f pos;
+    sf::Color color;
+    void (*interact)(Sprite *a, Sprite *b);
+    void (*api_update)(Sprite *a);
+    uint64_t get_frame_count();
+    uint64_t reset_frame_count();
+    bool enabled;
 protected:
     sf::Shape *texture;
     bool gravity_enabled;
@@ -40,6 +51,7 @@ protected:
     void update_collider_pos();
     
     sf::Vector3i offset;
+    uint64_t frame_counter;
 
 };
 

@@ -11,6 +11,7 @@ using namespace std;
 #include <thread>
 #include "../include/timer.hpp"
 #include <mutex>
+#include "../include/window_settings.hpp"
 
 
 std::mutex m;
@@ -31,8 +32,6 @@ Global::Global(int i)
 void Global::Instantiate(Sprite *g)
 {
     add_to_list(g);
-    //std::thread t(&GameObject::run_in_thread, this);
-    //t.detach();
 }
 
 void Global::FixedUpdate()
@@ -52,9 +51,6 @@ int Global::run_in_thread()
         uint64_t start_time = timer();
         uint64_t next_iter = start_time + FIXED_UPDATE_LENGTH;
         FixedUpdate();
-        while(checker !=0){
-            usleep(100);
-        }
         Collider();
         int64_t time_remaining = next_iter - timer(); 
         if(count == 0){
@@ -70,11 +66,6 @@ int Global::run_in_thread()
     
 }
 
-int faulty(std::size_t element)
-{
-    static std::vector<int> shortOne{1,2,3,4,5};
-    return shortOne.at(element); // This will throw.
-}
 int Global::add_to_list(Sprite *g)
 {
     InstantiatedObjects.push_back(g);
@@ -107,20 +98,13 @@ void Global::Run()
 #include <iostream>
 void Global::do_collision(list<Sprite*> bucket, int idx)
 {
-    //printf("Started Thread %d\n", idx);
     for(auto sprite: bucket)
-        {
-            //printf("here!%d\n %lu", (int)BucketedObjects[1].size(), timer());
-            //printf("x%f y%f\n", sprite->get_texture()->getPosition().x,sprite->get_texture()->getPosition().y );
-            if((sprite)->sprite_type != GROUND_T){
+        {if((sprite)->sprite_type != GROUND_T){
                 for (auto other: bucket)
                 {
                     if ((other)!=sprite)
                     {
-                        //printf("%f %f %f %f\n", sprite->collider->left, sprite->collider->top, sprite->collider->width, sprite->collider->height);
-                        //printf("%f %f %f %f\n", other->collider->left, other->collider->top, other->collider->width, other->collider->height);
                         bool b = (sprite)->resolve_collider(other);
-                        //if (b) printf("collision!\n");
                     }
                 }
             }
@@ -132,19 +116,40 @@ void Global::do_collision(list<Sprite*> bucket, int idx)
 
 }
 
-void Global::Collider()
+void Global::init_buckets()
 {
     checker = ~0;
     for(auto sprite : InstantiatedObjects)
     {
-        int d = static_cast<int>(sprite->pos.x)/80;
-        if (d>7) { d = 7;}
-        if (d<0) { d = 0;}
-        int e = static_cast<int>(sprite->pos.y)/80;
-        if (e>7) { e = 7;}
-        if (e<0) { e = 0;}
-        BucketedObjects[d][e].push_back(sprite);
+        if(sprite->enabled == false) continue;
+        int bucket_width = WIDTH/8 + BUCKET_OFFSET;
+        int bucket_height = HEIGHT/8 + BUCKET_OFFSET;
+        int64_t t_i = static_cast<int64_t>(sprite->collider->top)/bucket_height;
+        int64_t l_i = static_cast<int64_t>(sprite->collider->left)/bucket_width;
+        int64_t w_i = 1+static_cast<int64_t>(sprite->collider->width)/bucket_height;
+        int64_t h_i = 1+static_cast<int64_t>(sprite->collider->height)/bucket_width;
+        for(int i = t_i; i < t_i + h_i; i++)
+        {
+            for(int j = l_i; j < l_i + w_i; j++)
+            {
+                int ni = i;
+                int nj = j;
+                if (i>7) { ni = 7;}
+                if (i<0) { ni = 0;}
+                if (j>7) { nj = 7;}
+                if (j<0) { nj = 0;}
+                BucketedObjects[ni][nj].push_back(sprite);
+                //printf("20\n");
+            }
+            //printf("19\n");
+        }
+        //printf("18\n");
     }
+}
+
+void Global::Collider()
+{
+    init_buckets();
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
             T[i][j] = std::thread(&Global::do_collision, this, BucketedObjects[i][j], i*8+j);
@@ -162,9 +167,15 @@ void Global::Collider()
 
 void Global::Draw(sf::RenderWindow *w)
 {
-    for(auto sprite: InstantiatedObjects)
-        {
-            (*w).draw(*sprite->get_texture());
-            //printf("Drawn here %d\n", (int)InstantiatedObjects.size());
-        }
+    while(checker != 0)
+    {
+        (*w).clear(sf::Color(0, 0, 0, 255));
+        //printf("drawing\n");
+        int count = 0;
+        for(auto sprite: InstantiatedObjects)
+            {
+                if(sprite->enabled)(*w).draw(*sprite->get_texture());
+            }
+        (*w).display();
+    }
 }
