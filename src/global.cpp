@@ -36,10 +36,12 @@ void Global::Instantiate(Sprite *g)
 
 void Global::FixedUpdate()
 {
+    //while(checker!=0);
     for(auto gameobject: InstantiatedObjects)
     {
         (*gameobject).FixedUpdate();
     }
+    
 }
 
 int Global::run_in_thread()
@@ -50,8 +52,9 @@ int Global::run_in_thread()
     {
         uint64_t start_time = timer();
         uint64_t next_iter = start_time + FIXED_UPDATE_LENGTH;
-        FixedUpdate();
         Collider();
+        FixedUpdate();
+        
         int64_t time_remaining = next_iter - timer(); 
         if(count == 0){
             float delta = stopwatch(&init_time);
@@ -126,11 +129,11 @@ void Global::init_buckets()
         int bucket_height = HEIGHT/8 + BUCKET_OFFSET;
         int64_t t_i = static_cast<int64_t>(sprite->collider->top)/bucket_height;
         int64_t l_i = static_cast<int64_t>(sprite->collider->left)/bucket_width;
-        int64_t w_i = 1+static_cast<int64_t>(sprite->collider->width)/bucket_height;
-        int64_t h_i = 1+static_cast<int64_t>(sprite->collider->height)/bucket_width;
-        for(int i = t_i; i < t_i + h_i; i++)
+        int64_t w_i = static_cast<int64_t>(sprite->collider->width)/bucket_width;
+        int64_t h_i = static_cast<int64_t>(sprite->collider->height)/bucket_height;
+        for(int i = t_i-1; i < t_i+1 + h_i; i++)
         {
-            for(int j = l_i; j < l_i + w_i; j++)
+            for(int j = l_i-1; j < l_i+1 + w_i; j++)
             {
                 int ni = i;
                 int nj = j;
@@ -138,7 +141,9 @@ void Global::init_buckets()
                 if (i<0) { ni = 0;}
                 if (j>7) { nj = 7;}
                 if (j<0) { nj = 0;}
+                //printf("%d %d\n", i, j);
                 BucketedObjects[ni][nj].push_back(sprite);
+                //BucketedObjects[0][0].push_back(sprite);
                 //printf("20\n");
             }
             //printf("19\n");
@@ -163,11 +168,12 @@ void Global::Collider()
             BucketedObjects[i][j].clear();
         }
     }
+    //while(checker!=0);
 }
 
 void Global::Draw(sf::RenderWindow *w)
 {
-    while(checker != 0)
+    while(1)
     {
         (*w).clear(sf::Color(0, 0, 0, 255));
         //printf("drawing\n");
@@ -177,5 +183,6 @@ void Global::Draw(sf::RenderWindow *w)
                 if(sprite->enabled)(*w).draw(*sprite->get_texture());
             }
         (*w).display();
+        break;
     }
 }

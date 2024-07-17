@@ -39,6 +39,7 @@ public:
     uint64_t get_frame_count();
     uint64_t reset_frame_count();
     bool enabled;
+    sf::Vector2f staged_move;
 protected:
     sf::Shape *texture;
     bool gravity_enabled;

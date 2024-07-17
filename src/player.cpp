@@ -13,8 +13,8 @@ void Player::set_event(sf::Event *evnt)
 
 int Player::player_controller() 
 {
-    float slowed_move = (touch_ground ? 1.0 : 0.5)*STEP;
-    
+    //float slowed_move = (touch_ground ? 1.0 : 0.5)*STEP;
+    float slowed_move = STEP;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
     {
         (*texture).move(-slowed_move, 0.0f);
@@ -25,23 +25,23 @@ int Player::player_controller()
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
     {
-        //(*texture).move(0.0f, -slowed_move);
+        (*texture).move(0.0f, -slowed_move);
     }
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
     {
-        //(*texture).move(0.0f, slowed_move);
+        (*texture).move(0.0f, slowed_move);
     }
-    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
-    // {
-    //     prev = force;
-    //     force = sf::Vector2f(0.0f, 0.0f);
-    //     gravity_enabled = false;
-    // }
-    // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::H))
-    // {
-    //     force = prev;
-    //     gravity_enabled = true;
-    // }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::R))
+    {
+        prev = force;
+        force = sf::Vector2f(0.0f, 0.0f);
+        gravity_enabled = false;
+    }
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::H))
+    {
+        force = prev;
+        gravity_enabled = true;
+    }
     if (touch_ground && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space))
     {
         velocity = sf::Vector2f(0.0f, -1.0f);

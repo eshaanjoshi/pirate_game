@@ -91,11 +91,13 @@ Player *create_player(Global *g, float x, float y)
     player->setFillColor(sf::Color::Red);
     player->setOrigin(x/2, y/2);
     player->setPosition(50.0f, 50.0f);
-    Player *p = new Player(player, x/2, y/2, 20.0f);
-    p->set_gravity(true);
+    Player *p = new Player(player, x, y, 20.0f);
+    p->set_gravity(false);
     p->set_force(0.0f, 10.0f);
     g->Instantiate(p);
     p->elasticity = 0.5f;
+    p->set_custom_collider(50.0f - (x/2), 50.0f - (y/2), x, y);
+    //p->collider = new sf::FloatRect(100.0f, 100.0f, 50.0f, 50.0f);
     return p;
 }
 
@@ -105,19 +107,19 @@ Sprite *create_block(Global *g, float x, float y, float xpos, float ypos, float 
     player->setFillColor(sf::Color::Blue);
     player->setOrigin(x/2, y/2);
     player->setPosition(xpos, ypos);
-    Sprite *p = new Sprite(player, x/2, y/2, 20.0f, NONE_T);
+    Sprite *p = new Sprite(player, x, x, 20.0f, NONE_T);
     p->set_gravity(false);
     p->set_velocity(vx, vy);
     p->set_force(0.0f, 10.0f);
     g->Instantiate(p);
     p->elasticity = sqrt(e);
     p->interact = &interact;
-    p->sprite_type = CLEAN_T;
-    p->color = sf::Color::Green;
-    if (rand() % 10 == 0){
-        p->sprite_type = INFECTED_T;
-        p->color = sf::Color::Red;
-    }
+    // p->sprite_type = CLEAN_T;
+    // p->color = sf::Color::Green;
+    // if (rand() % 10 == 0){
+    //     p->sprite_type = INFECTED_T;
+    //     p->color = sf::Color::Red;
+    // }
     p->api_update = &update;
     return p;
 }
@@ -128,7 +130,7 @@ Sprite* create_platform(Global *g, float x, float y, float xpos, float ypos)
     sprite->setFillColor(sf::Color::Green);
     sprite->setOrigin(x/2, y/2);
     sprite->setPosition(xpos, ypos);
-    Sprite *p = new Sprite(sprite, x/2, y/2, -1.0f, GROUND_T);
+    Sprite *p = new Sprite(sprite, x, y, -1.0f, GROUND_T);
     p->set_gravity(false);
     p->set_force(0.0f, 0.0f);
     g->Instantiate(p);
@@ -139,9 +141,18 @@ void multi_block_create(Global *g)
 {
     int locx = 10 + rand() % 480;
     int locy = 10 + rand() % 480;
+    int velx = -10 + rand() % 100;
+    int vely = -10 + rand() % 100;
+    create_block(g, 50.0f, 50.0f, locx, locy, velx, vely, 1.0f);
+}
+
+void multi_block_create_2(Global *g, int i, int j)
+{
+    int locx = 10 + i*8;
+    int locy = 10 + j*8;;
     int velx = -10 + rand() % 40;
     int vely = -10 + rand() % 40;
-    create_block(g, 5.0f, 5.0f, locx, locy, velx, vely, 1.0f);
+    create_block(g, 5.0f, 5.0f, locx, locy, velx, vely, 0.99f);
 }
 
 int main()
@@ -151,10 +162,20 @@ int main()
     
 
     Global *g = CreateGlobal();
-    for(int i = 0; i < 5000; i++)
-    {
-        multi_block_create(g);
-    }
+    create_player(g, 50.0f, 50.0f);
+    // multi_block_create(g);
+    // multi_block_create(g);
+    // multi_block_create(g);
+    // multi_block_create(g);
+    // multi_block_create(g);
+    // multi_block_create(g);
+    // for(int i = 0; i < 40; i++)
+    // {
+    //     for(int j = 0; j < 40; j++)
+    //     {
+    //         multi_block_create_2(g, i, j);
+    //     }
+    // }
     uint64_t init_time = timer();
     create_platform(g, 512.0f, 10.0f, 256.0f, 512.0f);
     create_platform(g, 512.0f, 10.0f, 256.0f, 0.0f);
