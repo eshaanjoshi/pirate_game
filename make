@@ -41,3 +41,4 @@ else
     g++ *.o -o target/sfml-app -lsfml-graphics -lsfml-window -lsfml-system -lX11 -lpthread
     exit 1
 fi
+ g++ test.cpp -lsfml-graphics -lsfml-window -lsfml-system -lX11 -lpthread

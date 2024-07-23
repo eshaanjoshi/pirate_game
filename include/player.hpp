@@ -8,6 +8,8 @@ public:
     Player(sf::Shape *s, float xoff, float yoff, float m);
     void FixedUpdate();
     void set_event(sf::Event *evnt);
+    bool in_conversation;
+    void generate_text(string s);
 protected:
     sf::Event *e;
     int player_controller();

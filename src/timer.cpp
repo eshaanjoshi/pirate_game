@@ -2,6 +2,28 @@
 #include <time.h>
 #include <iostream>
 #include <stdio.h>
+#include <mutex>
+std::mutex frame_mutex;
+
+
+static uint64_t *frames;
+
+void init_frame_counter()
+{
+    frames = (uint64_t*)malloc(sizeof(uint64_t));
+}
+
+void inc_frame_counter()
+{
+    frame_mutex.lock();
+    *frames = *frames + 1;
+    frame_mutex.unlock();
+}
+
+uint64_t get_frame_counter()
+{
+    return *frames;
+}
 
 uint64_t timer()
 {

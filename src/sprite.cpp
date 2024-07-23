@@ -20,7 +20,7 @@ void default_additional_interact(Sprite *a)
 }
 
 
-Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE type):GameObject()
+Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE type, string str):GameObject()
 {
     printf("offsets %f %f %f %f\n", xoffset, yoffset, width, height);
     texture = s;
@@ -31,8 +31,7 @@ Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE typ
     xoffset = width;
     yoffset = height;
     create_default_collider();
-    //printf("offsets %f %f %f %f\n",xoffset, yoffset, xoff, yoff);
-    offset = sf::Vector3i(rand() % 256, rand() % 256, rand() % 256);
+    offset = sf::Vector3i(0,0,255);
     color = sf::Color(offset.x, offset.y, offset.z);
     mass = m;
     sprite_type = type;
@@ -41,7 +40,13 @@ Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE typ
     this->api_update = default_additional_interact;
     enabled = true;
     staged_move = sf::Vector2f(0.0f, 0.0f);
+    sprite_unique_id = rand();
+    is_interacting = false;
+    interactive_string = str;
 }
+
+
+
 
 sf::Shape *Sprite::get_texture()
 {
@@ -87,7 +92,14 @@ void Sprite::update_collider_pos(){
     collider->top = pos.y-((yoffset/2.0f));
     collider->width = xoffset;
     collider->height = yoffset;
+    interactive_collider->left = -5.0f + pos.x-(xoffset/2.0f);
+    //printf("%f %f\n", pos.y + texture->getSize()/2.0f, );
+    interactive_collider->top = -5.0f + pos.y-((yoffset/2.0f));
+    interactive_collider->width = 10.0f + xoffset;
+    interactive_collider->height = 10.0f + yoffset;
     //sf::IntRect t = texture->getTextureRect();
+    //printf("interactivespace%f %f %f %f\n", interactive_collider->top, interactive_collider->left, interactive_collider->height, interactive_collider->width);
+
 }
 
 int bounce_between(int num, int offset)
@@ -102,6 +114,7 @@ int bounce_between(int num, int offset)
 
 void Sprite::FixedUpdate()
 {
+    
     gravity();
     this->api_update(this);
     pos = texture->getPosition();
@@ -113,11 +126,13 @@ void Sprite::FixedUpdate()
 void Sprite::create_default_collider()
 {
     collider = new sf::FloatRect(pos.x -xoffset/2.0f, pos.y-yoffset/2.0f, xoffset, yoffset);
+    interactive_collider = new sf::FloatRect(-5 +pos.x -xoffset/2.0f, -5+pos.y-yoffset/2.0f, xoffset+10, yoffset+10);
 }
 
 void Sprite::set_custom_collider(float left, float top, float width, float height)
 {
     collider = new sf::FloatRect(left, top, width, height);
+    interactive_collider = new sf::FloatRect(left - 5, top - 5, width + 10, height + 10);
 }
 
 sf::Vector2f *compute_mults(sf::Vector2f pos1, sf::Vector2f pos2)
@@ -131,10 +146,45 @@ bool Sprite::resolve_collider(Sprite *other)
 {
     
     sf::FloatRect coll_box;
-    bool b = collider->intersects(*(other->collider), coll_box);
+    collider->top = collider->top + staged_move.y;
+    collider->left = collider->left + staged_move.x;
+    // sf::FloatRect *collider2 = (other->collider);
+    // collider2->top = collider2->top + other->staged_move.y;
+    // collider2->left = collider2->left + other->staged_move.x;
+    bool b = collider->intersects(*other->interactive_collider, coll_box);
+    if(sprite_type== INTERACTABLE_T && other->sprite_type==PLAYER_T)
+    {
+        //printf("HERE!\n");
+       
+        if(b)
+        {
+            interact(other, this);
+            TextObject **t = get_text("Interact");
+            if(t!=NULL)
+            {
+                //printf("enabling text!!\n");
+                //(*t)->enabled=ENABLED;
+                (*t)->set_text_state(ENABLED);
+                is_interacting = true;
+
+                other->is_interacting = true;
+            }
+        }
+        else{
+            TextObject **t = get_text("Interact");
+            if(t!=NULL)
+            {
+                //printf("disabling text!!\n");
+                //(*t)->enabled=DISABLED;
+                (*t)->set_text_state(DISABLED);
+                //is_interacting = false;
+                //other->is_interacting = false;
+            }
+        }
+    }
     if (sprite_type != GROUND_T && b) 
     {
-        interact(this, other);
+        //interact(this, other);
         sf::Vector2f coll_move(coll_box.width, coll_box.height);
         sf::Vector2f *mults = compute_mults(pos, other->pos);
         float total_mass = mass + other->mass;
@@ -142,10 +192,8 @@ bool Sprite::resolve_collider(Sprite *other)
         float percent_theirs = other->mass < 0.0f ? 0 : 1 - percent_ours;
         if(coll_box.width < coll_box.height)
         {
-            //texture->move(mults->x* coll_move.x*percent_ours, 0);
-            //other->get_texture()->move(-1*mults->x*coll_move.x*percent_theirs,0);
-            staged_move = sf::Vector2f(mults->x* coll_move.x*percent_ours, 0);
-            other->staged_move = sf::Vector2f(-1*mults->x*coll_move.x*percent_theirs,0);
+            staged_move = sf::Vector2f(mults->x* coll_move.x*percent_ours, staged_move.y);
+            other->staged_move = sf::Vector2f(-1*mults->x*coll_move.x*percent_theirs, other->staged_move.y);
             float newvel = elasticity * velocity.x;
             if(pos.x < other->pos.x && velocity.x > 0.0f)
             {
@@ -154,24 +202,41 @@ bool Sprite::resolve_collider(Sprite *other)
             if(pos.x > other->pos.x && velocity.x < 0.0f)
             {
                 newvel = newvel * -1;
+                collide_x = -1;
+            }
+            if(pos.x < other->pos.x)
+            {
+                collide_x = 1;
+            }
+            if(pos.x > other->pos.x)
+            {
+                collide_x = -1;
             }
             velocity.x = 0;
             if (!contact && abs(newvel) >= CUTOFF) velocity.x = newvel;
         }
         else
         {
-            //texture->move(0, mults->y*coll_move.y*percent_ours);
-            //other->get_texture()->move(0, -1 * mults->y* coll_move.y * percent_theirs);
-            staged_move = sf::Vector2f(0, mults->y*coll_move.y*percent_ours);
-            other->staged_move = sf::Vector2f(0, -1 * mults->y* coll_move.y * percent_theirs);
+            staged_move = sf::Vector2f(staged_move.x, mults->y*coll_move.y*percent_ours);
+            other->staged_move = sf::Vector2f(other->staged_move.y, -1 * mults->y* coll_move.y * percent_theirs);
             float newvel = elasticity * velocity.y;
             if(pos.y < other->pos.y && velocity.y > 0.0f)
             {
                 newvel = newvel * -1;
+                collide_y = 1;
             }
             if(pos.y > other->pos.y && velocity.y < 0.0f)
             {
                 newvel = newvel * -1;
+                collide_y = -1;
+            }
+            if(pos.y < other->pos.y)
+            {
+                collide_y = 1;
+            }
+            if(pos.y > other->pos.y)
+            {
+                collide_y = -1;
             }
             velocity.y = 0;
             
@@ -187,6 +252,23 @@ bool Sprite::resolve_collider(Sprite *other)
     return b;
 }
 
+TextObject **Sprite::get_text(string s)
+{
+    TextObject **t;
+    try{
+        t = associated_text.at(s);
+    }
+    catch(std::out_of_range)
+    {
+        return NULL;
+    }
+    return t;
+}
+
+void Sprite::add_text(string s, TextObject **t){
+    (*t)->enabled = DISABLED;
+    associated_text[s] = t;
+}
 
 uint64_t Sprite::get_frame_count(){
     return frame_counter;

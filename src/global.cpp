@@ -34,6 +34,13 @@ void Global::Instantiate(Sprite *g)
     add_to_list(g);
 }
 
+void Global::InstantiateText(TextObject *g)
+{
+    g->enabled = DISABLED;
+    TextObjects.push_back(g);
+    printf("instantiaged%d \n", (int)(g->enabled == DISABLED));
+}
+
 void Global::FixedUpdate()
 {
     //while(checker!=0);
@@ -53,8 +60,8 @@ int Global::run_in_thread()
         uint64_t start_time = timer();
         uint64_t next_iter = start_time + FIXED_UPDATE_LENGTH;
         Collider();
+        while(checker!=0);
         FixedUpdate();
-        
         int64_t time_remaining = next_iter - timer(); 
         if(count == 0){
             float delta = stopwatch(&init_time);
@@ -102,16 +109,18 @@ void Global::Run()
 void Global::do_collision(list<Sprite*> bucket, int idx)
 {
     for(auto sprite: bucket)
-        {if((sprite)->sprite_type != GROUND_T){
-                for (auto other: bucket)
+    {
+        sprite->is_interacting = false;
+        if((sprite)->sprite_type != GROUND_T){
+            for (auto other: bucket)
+            {
+                if ((other)!=sprite)
                 {
-                    if ((other)!=sprite)
-                    {
-                        bool b = (sprite)->resolve_collider(other);
-                    }
+                    bool b = (sprite)->resolve_collider(other);
                 }
             }
         }
+    }
     m.lock();
     unsigned long mask = ~(0x1L << idx);
     checker &= mask;
@@ -171,17 +180,34 @@ void Global::Collider()
     //while(checker!=0);
 }
 
-void Global::Draw(sf::RenderWindow *w)
+void Global::print_id_list()
+{
+    for (auto sprite: InstantiatedObjects)
+    {
+        printf("Object ID: %d\n", sprite->sprite_unique_id);
+    }
+}
+
+void Global::Draw(sf::RenderWindow *w, sf::Font *font)
 {
     while(1)
     {
         (*w).clear(sf::Color(0, 0, 0, 255));
-        //printf("drawing\n");
         int count = 0;
         for(auto sprite: InstantiatedObjects)
+        {
+            if(sprite->enabled)(*w).draw(*sprite->get_texture());
+            //printf("Sprite!");
+        } 
+        for(auto text:TextObjects)
+        {
+            if(text->enabled==ENABLED)
             {
-                if(sprite->enabled)(*w).draw(*sprite->get_texture());
+                //printf("text enabled objid %p\n", (void*)text);
+                (*w).draw(*text->get_texture());
+                (*w).draw(*text->get_text());
             }
+        }
         (*w).display();
         break;
     }

@@ -3,7 +3,7 @@
 #define SPRITE
 #include <SFML/Graphics.hpp>
 #include "gameobject.hpp"
-
+#include "text_objects.hpp"
 class Global;
 enum SPRITE_TYPE{
     NONE_T,
@@ -12,13 +12,14 @@ enum SPRITE_TYPE{
     CLEAN_T,
     INFECTED_T, 
     DEAD_T,
-    RECOVERED_T
+    RECOVERED_T,
+    INTERACTABLE_T
 };
 static const char * EnumStrings[] = { "none", "ground", "player", "clean", "infected", "dead", "recovered"};
 
 class Sprite:public GameObject{
 public:
-    Sprite(sf::Shape *s, float xoffset, float yoffset, float m, SPRITE_TYPE type);
+    Sprite(sf::Shape *s, float xoffset, float yoffset, float m, SPRITE_TYPE type, string str = "");
     sf::Shape *get_texture();
     void set_gravity(bool g);
     void set_force(float x, float y);
@@ -26,6 +27,7 @@ public:
     virtual void FixedUpdate();
     bool resolve_collider(Sprite *other);
     sf::FloatRect *collider;
+    sf::FloatRect *interactive_collider;
     void set_custom_collider(float left, float top, float width, float height);
     float mass;
     float elasticity;
@@ -40,6 +42,11 @@ public:
     uint64_t reset_frame_count();
     bool enabled;
     sf::Vector2f staged_move;
+    TextObject **get_text(string s);
+    void add_text(string s, TextObject **t);
+    uint32_t sprite_unique_id;
+    bool is_interacting;
+    string interactive_string;
 protected:
     sf::Shape *texture;
     bool gravity_enabled;
@@ -50,9 +57,11 @@ protected:
     float yoffset;
     void create_default_collider();
     void update_collider_pos();
-    
+    int collide_x;
+    int collide_y;
     sf::Vector3i offset;
     uint64_t frame_counter;
+    map<string, TextObject**> associated_text;
 
 };
 
