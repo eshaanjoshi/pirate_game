@@ -5,14 +5,15 @@
 
 class Player:public Sprite{
 public:
-    Player(sf::Shape *s, float xoff, float yoff, float m);
+    Player(sf::Shape *s, float xoff, float yoff, float m, float xpos = WIDTH/2, float ypos = HEIGHT/2);
     void FixedUpdate();
     void set_event(sf::Event *evnt);
     bool in_conversation;
     void generate_text(string s);
 protected:
     sf::Event *e;
-    int player_controller();
+    int player_controller();    
+    void BasicInteract(Sprite *other);
 private:
     sf::Vector2f prev;
     bool out_of_bounds();

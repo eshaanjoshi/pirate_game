@@ -20,13 +20,15 @@ void default_additional_interact(Sprite *a)
 }
 
 
-Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE type, string str):GameObject()
+Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE type, float xpos, float ypos, string str):GameObject()
 {
     printf("offsets %f %f %f %f\n", xoffset, yoffset, width, height);
     texture = s;
     velocity = sf::Vector2f(0.0f, 0.0f);
     force = sf::Vector2f(0.0f, 0.0f);
     gravity_enabled = false;
+    texture->setOrigin(width/2, height/2);
+    texture->setPosition(xpos, ypos);
     pos = texture->getPosition();
     xoffset = width;
     yoffset = height;
@@ -43,6 +45,7 @@ Sprite::Sprite(sf::Shape *s, float width, float height, float m, SPRITE_TYPE typ
     sprite_unique_id = rand();
     is_interacting = false;
     interactive_string = str;
+   
 }
 
 
@@ -126,7 +129,7 @@ void Sprite::FixedUpdate()
 void Sprite::create_default_collider()
 {
     collider = new sf::FloatRect(pos.x -xoffset/2.0f, pos.y-yoffset/2.0f, xoffset, yoffset);
-    interactive_collider = new sf::FloatRect(-5 +pos.x -xoffset/2.0f, -5+pos.y-yoffset/2.0f, xoffset+10, yoffset+10);
+    interactive_collider = new sf::FloatRect(-2 +pos.x -xoffset/2.0f, -2+pos.y-yoffset/2.0f, xoffset+4, yoffset+4);
 }
 
 void Sprite::set_custom_collider(float left, float top, float width, float height)
@@ -141,6 +144,10 @@ sf::Vector2f *compute_mults(sf::Vector2f pos1, sf::Vector2f pos2)
     return mults;
 }
 
+void Sprite::BasicInteract(Sprite *a)
+{
+
+}
 
 bool Sprite::resolve_collider(Sprite *other)
 {
@@ -154,16 +161,16 @@ bool Sprite::resolve_collider(Sprite *other)
     bool b = collider->intersects(*other->interactive_collider, coll_box);
     if(sprite_type== INTERACTABLE_T && other->sprite_type==PLAYER_T)
     {
-        //printf("HERE!\n");
+        
        
         if(b)
         {
+            other->BasicInteract(this);
             interact(other, this);
+            
             TextObject **t = get_text("Interact");
             if(t!=NULL)
             {
-                //printf("enabling text!!\n");
-                //(*t)->enabled=ENABLED;
                 (*t)->set_text_state(ENABLED);
                 is_interacting = true;
 

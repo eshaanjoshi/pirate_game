@@ -4,27 +4,25 @@
 #include <SFML/Graphics.hpp>
 #include "gameobject.hpp"
 #include "text_objects.hpp"
+#include "window_settings.hpp"
 class Global;
 enum SPRITE_TYPE{
-    NONE_T,
-    GROUND_T,
-    PLAYER_T,
-    CLEAN_T,
-    INFECTED_T, 
-    DEAD_T,
-    RECOVERED_T,
-    INTERACTABLE_T
+    NONE_T = 0b11111111,
+    GROUND_T = 0b1,
+    PLAYER_T = 0b10,
+    INTERACTABLE_T = 0b100
 };
-static const char * EnumStrings[] = { "none", "ground", "player", "clean", "infected", "dead", "recovered"};
+static const char * EnumStrings[] = { "none", "ground", "player", "interactable"};
 
 class Sprite:public GameObject{
 public:
-    Sprite(sf::Shape *s, float xoffset, float yoffset, float m, SPRITE_TYPE type, string str = "");
+    Sprite(sf::Shape *s, float xoffset, float yoffset, float m, SPRITE_TYPE type, float xpos = (WIDTH/2), float ypos = (HEIGHT/2), string str = "");
     sf::Shape *get_texture();
     void set_gravity(bool g);
     void set_force(float x, float y);
     void set_velocity(float x, float y);
     virtual void FixedUpdate();
+    
     bool resolve_collider(Sprite *other);
     sf::FloatRect *collider;
     sf::FloatRect *interactive_collider;
@@ -48,6 +46,7 @@ public:
     bool is_interacting;
     string interactive_string;
 protected:
+    virtual void BasicInteract(Sprite *other);
     sf::Shape *texture;
     bool gravity_enabled;
     void gravity();

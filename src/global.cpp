@@ -204,6 +204,7 @@ void Global::Draw(sf::RenderWindow *w, sf::Font *font)
             if(text->enabled==ENABLED)
             {
                 //printf("text enabled objid %p\n", (void*)text);
+                //std::cout << "test" << (text->get_text()->getString().toAnsiString()) << endl;
                 (*w).draw(*text->get_texture());
                 (*w).draw(*text->get_text());
             }

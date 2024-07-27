@@ -10,9 +10,7 @@ TextObject::TextObject(sf::Font *font, string a, sf::Vector2f *pos, sf::Vector2f
     (*text).setCharacterSize(10);
     (*text).setFont(*font);
     (*text).setFillColor(sf::Color(255, 255, 255, 255));
-    //(*text).setStyle(sf::Text::Italic);
     posit = pos;
-    //(*text).setOrigin(25.0f, 0.0f);
     (*text).setString(a);
     exists = true;
     enabled = DISABLED;

@@ -1,3 +1,3 @@
-#define WIDTH 512
-#define HEIGHT 512
+#define WIDTH 800
+#define HEIGHT 800
 #define BUCKET_OFFSET 32

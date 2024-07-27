@@ -1,8 +1,9 @@
 #include "../include/player.hpp"
 #include "../include/text_objects.hpp"
+#include "../include/window_settings.hpp"
 #define STEP 1.5f
 
-Player::Player(sf::Shape *s, float xoff, float yoff, float m):Sprite(s, xoff, yoff, m, PLAYER_T)
+Player::Player(sf::Shape *s, float xoff, float yoff, float m, float xpos, float ypos):Sprite(s, xoff, yoff, m, PLAYER_T, xpos, ypos)
 {
     in_conversation = false;
 }
@@ -21,6 +22,15 @@ void Player::generate_text(string s)
     {
         //printf("thing\n");
         (*t)->change_string(s);
+    }
+}
+
+
+void Player::BasicInteract(Sprite *other)
+{
+    if(other->sprite_type == INTERACTABLE_T)
+    {
+        generate_text(other->interactive_string);
     }
 }
 
@@ -58,13 +68,11 @@ int Player::player_controller()
             switch((*t)->enabled)
             {
                 case ENABLED:
-                    //(*t)->enabled = DISABLED;
                     (*t)->set_text_state(DISABLED);
                     reset_frame_count();
                     in_conversation = false;
                     break;   
                 case DISABLED:
-                    //(*t)->enabled = ENABLED;
                     (*t)->set_text_state(ENABLED);
                     reset_frame_count();
                     in_conversation = true;
@@ -89,7 +97,7 @@ int Player::player_controller()
 
 bool Player::out_of_bounds()
 {
-    bool b =  (pos.x > 512.0f || pos.y > 512.0f);
+    bool b =  (pos.x > WIDTH || pos.y > HEIGHT);
     b = b ||  (pos.x < 0.0f);
     if (b) printf("OFF SCREEN!\n");
     return b;
@@ -102,10 +110,6 @@ void Player::FixedUpdate(){
     collide_x = 0;
     collide_y = 0;
     pos = texture->getPosition();
-    //printf("texture %f %f\n", texture->getPosition().x, texture->getPosition().y);
-    //printf("position %f %f\n", pos.x, pos.y);
-    //printf("player collider %f %f\n", collider->left, collider->top);
-    
     if (out_of_bounds())
     {
         texture->setPosition(10.0f, 10.0f);
